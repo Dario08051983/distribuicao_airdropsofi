@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distribuição de Airdrops</title>
+  <link href="./css/tailwind.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <!-- Cabeçalho -->
+  <header class="bg-blue-600 p-4 text-white text-center">
+    <h1 class="text-2xl font-bold">Sistema de Distribuição de Airdrops</h1>
+  </header>
+
+  <!-- Seção Principal -->
+  <main class="container mx-auto mt-8 p-4">
+    <!-- Introdução -->
+    <section class="mb-8 text-center">
+      <h2 class="text-xl font-semibold mb-4">Bem-vindo ao Sistema de Airdrops</h2>
+      <p class="text-gray-700">Participe e acompanhe suas recompensas de forma fácil e rápida.</p>
+    </section>
+
+    <!-- Seção de Login/Registro -->
+    <section class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-lg font-semibold mb-4">Entrar ou Registrar</h2>
+      <form id="authForm" action="/api/auth/login" method="POST">
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" id="email" name="email" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div class="mb-4">
+          <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+          <input type="password" id="password" name="senha" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Entrar</button>
+      </form>
+
+      <p class="mt-4 text-center text-sm text-gray-600">Ainda não tem uma conta? <a href="#" id="registerLink" class="text-blue-600 hover:underline">Registre-se</a></p>
+
+      <!-- Botão de Login com Google -->
+      <button onclick="window.location.href='/auth/google'" class="w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 mt-4">Entrar com Google</button>
+    </section>
+
+    <!-- Seção de Distribuição de Airdrops (apenas para administradores) -->
+    <section class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-8">
+      <button onclick="distributeAirdrops()" class="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 mt-4">Distribuir Airdrops</button>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-gray-800 p-4 text-white text-center mt-8">
+    <p>© 2024 Sistema de Airdrops. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // Alterna o formulário entre login e registro
+    document.getElementById('registerLink').onclick = (event) => {
+      event.preventDefault();
+      document.getElementById('authForm').action = '/api/register';
+      document.getElementById('authForm').innerHTML = `
+        <div class="mb-4">
+          <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
+          <input type="text" id="name" name="nome" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" id="email" name="email" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div class="mb-4">
+          <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+          <input type="password" id="password" name="senha" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div class="mb-4">
+          <label for="wallet" class="block text-sm font-medium text-gray-700">Carteira</label>
+          <input type="text" id="wallet" name="carteira" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700">Registrar</button>
+      `;
+    };
+
+    // Submissão do formulário de autenticação (login/registro)
+    document.getElementById('authForm').onsubmit = async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData);
+      console.log("Dados enviados:", data); // Log para verificar os dados
+
+      const response = await fetch(event.target.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(event.target.action.includes('register') ? 'Registro realizado com sucesso!' : 'Login realizado com sucesso!');
+        // Redirecione para o painel ou outra página após o login/registro
+      } else {
+        alert(result.error || 'Erro ao processar sua solicitação');
+      }
+    };
+
+    // Função para distribuir airdrops
+    async function distributeAirdrops() {
+      const response = await fetch('/api/distribute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ somenteVerificados: true }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message);
+      } else {
+        alert(result.error || 'Erro na distribuição de airdrops');
+      }
+    }
+  </script>
+</body>
+</html>
